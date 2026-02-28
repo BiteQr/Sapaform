@@ -1,36 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAPA | Загрузка...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SAPA | Оформление заявки</title>
+    <script src="https://unpkg.com/imask"></script>
     <style>
-        body { background: #000; color: #00c2b3; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-        .btn { background: #00c2b3; color: #000; padding: 20px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: none; }
+        /* Весь твой стильный CSS остается без изменений */
+        :root { --accent: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --input: #2c2c2e; }
+        body { margin: 0; padding: 0; background: radial-gradient(circle at top, #1a2a6c, #000000); font-family: -apple-system, sans-serif; color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .card { width: 100%; max-width: 360px; background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; box-sizing: border-box; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        h1 { font-size: 20px; margin: 0 0 5px 0; text-align: center; }
+        p.subtitle { font-size: 13px; color: #8e8e93; text-align: center; margin: 0 0 15px 0; }
+        .form-group { margin-bottom: 10px; }
+        input, select { width: 100%; padding: 10px 12px; background: var(--input); border: 1px solid transparent; border-radius: 10px; color: white; font-size: 15px; outline: none; box-sizing: border-box; }
+        input:focus { border-color: var(--accent); }
+        button { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,122,255,0.3); }
+        button:disabled { background: #3a3a3c; }
+        #success { display: none; text-align: center; padding: 20px; }
+        .icon-check { font-size: 40px; color: #34c759; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div id="loader">
-        <h2>ПОДКЛЮЧЕНИЕ К SAPA...</h2>
-        <p>Пожалуйста, подождите или нажмите кнопку ниже</p>
-        <a href="https://script.google.com/macros/s/AKfycby58hfcDTim5JM-yWSEvYJ1x8xG23Ozkcdv3HP7-GnU3NsLuh1o771yb-Kv0UB_4bBc/exec" id="manual-btn" class="btn">ОТКРЫТЬ ФОРМУ</a>
-    </div>
 
-    <script>
-        var targetUrl = "https://script.google.com/macros/s/AKfycby58hfcDTim5JM-yWSEvYJ1x8xG23Ozkcdv3HP7-GnU3NsLuh1o771yb-Kv0UB_4bBc/exec";
-        
-        // 1. Попытка автоматического редиректа
-        window.location.href = targetUrl;
+<div class="card" id="form-container">
+    <h1>Оставить заявку</h1>
+    <p class="subtitle">Индивидуальное решение для бизнеса</p>
+    
+    <form id="leadForm">
+        <div class="form-group"><input type="text" name="name" placeholder="Ваше имя" required></div>
+        <div class="form-group"><input type="tel" id="phone" name="phone" placeholder="Телефон" required></div>
+        <div class="form-group"><input type="text" name="business_name" placeholder="Название компании" required></div>
+        <div class="form-group">
+            <select name="business_type" required>
+                <option value="" disabled selected>Сфера бизнеса</option>
+                <option value="Магазин одежды">Магазин одежды</option>
+                <option value="Кафе/Ресторан">Кафе/Ресторан</option>
+                <option value="Бар">Бар</option>
+                <option value="Фитнес">Фитнес</option>
+                <option value="Супермаркет">Супермаркет</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <select name="locations_count" required>
+                <option value="" disabled selected>Кол-во точек</option>
+                <option value="1">1</option><option value="2">2</option><option value="5+">5+</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <select name="timing" required>
+                <option value="1-2 дня (срочно)">1-2 дня (срочно)</option>
+                <option value="Узнать цены">Узнать цены</option>
+            </select>
+        </div>
+        <button type="submit" id="submit-btn">ОТПРАВИТЬ ЗАЯВКУ</button>
+    </form>
+</div>
 
-        // 2. Хак для Android (Intent) - выбивает из Инсты в Chrome
-        if (/Android/i.test(navigator.userAgent) && /Instagram/i.test(navigator.userAgent)) {
-            window.location.href = "intent://" + targetUrl.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
-        }
+<div id="success" class="card">
+    <div class="icon-check">✓</div>
+    <h2>Готово!</h2>
+    <p class="subtitle">Мы получили уведомление и скоро свяжемся с вами в WhatsApp.</p>
+</div>
 
-        // 3. Если через 2 секунды ничего не произошло (iOS), показываем кнопку
-        setTimeout(function() {
-            document.getElementById('manual-btn').style.display = 'inline-block';
-        }, 2000);
-    </script>
+<script>
+    IMask(document.getElementById('phone'), { mask: '+{7} (000) 000-00-00' });
+
+    // === ВСТАВЬ СВОЮ НОВУЮ ССЫЛКУ ИЗ GOOGLE SCRIPT НИЖЕ ===
+    const webAppUrl = "ЗДЕСЬ_ТВОЯ_НОВАЯ_ССЫЛКА_ИЗ_ШАГА_1";
+
+    const form = document.getElementById('leadForm');
+    const btn = document.getElementById('submit-btn');
+
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.innerText = "ОТПРАВКА...";
+
+        const formData = Object.fromEntries(new FormData(this));
+
+        fetch(webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Это важно для работы с Google извне
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(formData)
+        })
+        .then(() => {
+            // Так как mode: 'no-cors', мы не получим ответ JSON, 
+            // но если запрос ушел — считаем, что всё ок.
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+        })
+        .catch(err => {
+            alert("Ошибка отправки. Попробуйте еще раз.");
+            btn.disabled = false;
+            btn.innerText = "ОТПРАВИТЬ ЗАЯВКУ";
+        });
+    };
+</script>
 </body>
 </html>
