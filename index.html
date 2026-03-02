@@ -6,7 +6,6 @@
     <title>SAPA | Оформление заявки</title>
     <script src="https://unpkg.com/imask"></script>
     <style>
-        /* Весь твой стильный CSS остается без изменений */
         :root { --accent: #007AFF; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --input: #2c2c2e; }
         body { margin: 0; padding: 0; background: radial-gradient(circle at top, #1a2a6c, #000000); font-family: -apple-system, sans-serif; color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .card { width: 100%; max-width: 360px; background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; box-sizing: border-box; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
@@ -15,10 +14,11 @@
         .form-group { margin-bottom: 10px; }
         input, select { width: 100%; padding: 10px 12px; background: var(--input); border: 1px solid transparent; border-radius: 10px; color: white; font-size: 15px; outline: none; box-sizing: border-box; }
         input:focus { border-color: var(--accent); }
-        button { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,122,255,0.3); }
+        button { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,122,255,0.3); width: 100%; }
         button:disabled { background: #3a3a3c; }
         #success { display: none; text-align: center; padding: 20px; }
         .icon-check { font-size: 40px; color: #34c759; margin-bottom: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -42,19 +42,20 @@
                 <option value="Островок">Островок</option>
             </select>
         </div>
+        
         <div class="form-group">
-            <select name="locations_count" required>
-                <option value="" disabled selected>Кол-во точек</option>
-                <option value="1">1</option><option value="2">2</option><option value="5+">5+</option>
+            <select name="timing" id="timing" required>
+                <option value="" disabled selected>Сроки запуска</option>
+                <option value="fast">Готов оплатить и подключить (1-2 дня)</option>
+                <option value="info">Нужна информация</option>
+                <option value="check">Хочу узнать, подойдет ли мне</option>
             </select>
         </div>
-        <div class="form-group">
-            <select name="timing" required>
-                <option value="1-2 дня (срочно)">1-2 дня (срочно)</option>
-                <option value="Узнать цены">Узнать цены</option>
-                <option value="Позвоните поскорее">Позвоните поскорее</option>
-            </select>
+
+        <div class="form-group" id="email-group" style="display: none; animation: fadeIn 0.3s;">
+            <input type="email" name="email" id="email-input" placeholder="Ваш Email для реквизитов">
         </div>
+
         <button type="submit" id="submit-btn">ОТПРАВИТЬ ЗАЯВКУ</button>
     </form>
 </div>
@@ -66,10 +67,26 @@
 </div>
 
 <script>
+    // 1. Маска для телефона
     IMask(document.getElementById('phone'), { mask: '+{7} (000) 000-00-00' });
 
-    // === ВСТАВЬ СВОЮ НОВУЮ ССЫЛКУ ИЗ GOOGLE SCRIPT НИЖЕ ===
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbymZMkICuKCjA-xRoFICnWZ8mjXbsh0sa-e9dhRfABYxSmzSojt_mTphPzg-l-zM3iA/exec";
+    // 2. Логика появления поля Email
+    const timingSelect = document.getElementById('timing');
+    const emailGroup = document.getElementById('email-group');
+    const emailInput = document.getElementById('email-input');
+
+    timingSelect.onchange = function() {
+        if (this.value === 'fast') {
+            emailGroup.style.display = 'block';
+            emailInput.required = true;
+        } else {
+            emailGroup.style.display = 'none';
+            emailInput.required = false;
+        }
+    };
+
+    // 3. Ссылка на Google Script (НЕ ЗАБУДЬ СДЕЛАТЬ НОВОЕ РАЗВЕРТЫВАНИЕ ПОСЛЕ ОБНОВЛЕНИЯ КОДА В ТАБЛИЦЕ)
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbwBpT8bBkelMkNuipNk3C2_4oBxzpmdJ-5vMvalbqdGYg1WsSuN64fAaoZltNgCEyDZ/exec";
 
     const form = document.getElementById('leadForm');
     const btn = document.getElementById('submit-btn');
@@ -83,13 +100,11 @@
 
         fetch(webAppUrl, {
             method: 'POST',
-            mode: 'no-cors', // Это важно для работы с Google извне
+            mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(formData)
         })
         .then(() => {
-            // Так как mode: 'no-cors', мы не получим ответ JSON, 
-            // но если запрос ушел — считаем, что всё ок.
             document.getElementById('form-container').style.display = 'none';
             document.getElementById('success').style.display = 'block';
         })
